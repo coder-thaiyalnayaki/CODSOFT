@@ -1,47 +1,41 @@
-def add(x, y):
-    return x + y
+import tkinter as tk
 
-def subtract(x, y):
-    return x - y
-
-def multiply(x, y):
-    return x * y
-
-def divide(x, y):
-    if y != 0:
-        return x / y
+def on_click(button_value):
+    current_text = entry_var.get()
+    
+    if button_value == "=":
+        try:
+            result = eval(current_text)
+            entry_var.set(result)
+        except Exception as e:
+            entry_var.set("Error")
+    elif button_value == "C":
+        entry_var.set("")
     else:
-        return "Error: Cannot divide by zero."
+        entry_var.set(current_text + str(button_value))
 
-def calculator():
-    print("Simple Calculator")
-    print("Available operations:")
-    print("1. Addition (+)")
-    print("2. Subtraction (-)")
-    print("3. Multiplication (*)")
-    print("4. Division (/)")
+# Create the main window
+root = tk.Tk()
+root.title("Calculator")
 
-    try:
-        num1 = float(input("Enter the first number: "))
-        num2 = float(input("Enter the second number: "))
-        operation = input("Choose operation (1-4): ")
+# Entry widget for displaying the current input and result
+entry_var = tk.StringVar()
+entry = tk.Entry(root, textvariable=entry_var, justify="right", font=("Helvetica", 16))
+entry.grid(row=0, column=0, columnspan=4)
 
-        if operation == "1":
-            result = add(num1, num2)
-        elif operation == "2":
-            result = subtract(num1, num2)
-        elif operation == "3":
-            result = multiply(num1, num2)
-        elif operation == "4":
-            result = divide(num1, num2)
-        else:
-            print("Invalid operation. Please choose a number between 1 and 4.")
-            return
+# Buttons for digits and operations
+buttons = [
+    ("7", 1, 0), ("8", 1, 1), ("9", 1, 2), ("/", 1, 3),
+    ("4", 2, 0), ("5", 2, 1), ("6", 2, 2), ("*", 2, 3),
+    ("1", 3, 0), ("2", 3, 1), ("3", 3, 2), ("-", 3, 3),
+    ("0", 4, 0), (".", 4, 1), ("=", 4, 2), ("+", 4, 3),
+    ("C", 5, 0)
+]
 
-        print(f"Result: {result}")
+for (text, row, column) in buttons:
+    button = tk.Button(root, text=text, padx=20, pady=20, font=("Helvetica", 14),
+                       command=lambda t=text: on_click(t))
+    button.grid(row=row, column=column)
 
-    except ValueError:
-        print("Invalid input. Please enter valid numbers.")
-
-if __name__ == "__main__":
-    calculator()
+# Run the main loop
+root.mainloop()
