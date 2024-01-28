@@ -1,107 +1,149 @@
-import json
+import tkinter as tk
+from tkinter import Label, Entry, Button, Listbox, Scrollbar, messagebox
 
-def load_contacts():
-    try:
-        with open("contacts.json", "r") as file:
-            contacts = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        contacts = {}
-    return contacts
+class Contact:
+    def __init__(self, name, phone, email, address):
+        self.name = name
+        self.phone = phone
+        self.email = email
+        self.address = address
 
-def save_contacts(contacts):
-    with open("contacts.json", "w") as file:
-        json.dump(contacts, file, indent=2)
+class ContactManager:
+    def __init__(self):
+        self.contacts = []
 
-def add_contact(contacts):
-    name = input("Enter contact name: ")
-    phone = input("Enter phone number: ")
-    email = input("Enter email address: ")
-    address = input("Enter address: ")
+    def add_contact(self, contact):
+        self.contacts.append(contact)
 
-    contacts[name] = {
-        "phone": phone,
-        "email": email,
-        "address": address
-    }
+    def search_contact(self, keyword):
+        results = []
+        for contact in self.contacts:
+            if keyword.lower() in contact.name.lower() or keyword in contact.phone:
+                results.append(contact)
+        return results
 
-    print(f"\nContact '{name}' added successfully!")
+    def update_contact(self, index, updated_contact):
+        self.contacts[index] = updated_contact
 
-def view_contacts(contacts):
-    print("\n===== Contact List =====")
-    for name, contact_info in contacts.items():
-        print(f"{name}: {contact_info['phone']}")
+    def delete_contact(self, index):
+        del self.contacts[index]
 
-def search_contact(contacts):
-    query = input("\nEnter contact name or phone number to search: ")
-    found = False
+class ContactApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Contact Manager")
 
-    for name, contact_info in contacts.items():
-        if query in (name, contact_info['phone']):
-            print(f"\nContact Information for '{name}':")
-            print(f"Phone: {contact_info['phone']}")
-            print(f"Email: {contact_info['email']}")
-            print(f"Address: {contact_info['address']}")
-            found = True
+        self.contact_manager = ContactManager()
 
-    if not found:
-        print("\nContact not found.")
+        # Labels and Entry widgets for contact details
+        self.name_label = Label(root, text="Name:")
+        self.name_label.grid(row=0, column=0, padx=10, pady=10)
+        self.name_entry = Entry(root)
+        self.name_entry.grid(row=0, column=1, padx=10, pady=10)
 
-def update_contact(contacts):
-    name = input("\nEnter the name of the contact to update: ")
+        self.phone_label = Label(root, text="Phone:")
+        self.phone_label.grid(row=1, column=0, padx=10, pady=10)
+        self.phone_entry = Entry(root)
+        self.phone_entry.grid(row=1, column=1, padx=10, pady=10)
 
-    if name in contacts:
-        print(f"\nCurrent contact information for '{name}':")
-        print(f"Phone: {contacts[name]['phone']}")
-        print(f"Email: {contacts[name]['email']}")
-        print(f"Address: {contacts[name]['address']}")
+        self.email_label = Label(root, text="Email:")
+        self.email_label.grid(row=2, column=0, padx=10, pady=10)
+        self.email_entry = Entry(root)
+        self.email_entry.grid(row=2, column=1, padx=10, pady=10)
 
-        contacts[name]['phone'] = input("\nEnter new phone number: ")
-        contacts[name]['email'] = input("Enter new email address: ")
-        contacts[name]['address'] = input("Enter new address: ")
+        self.address_label = Label(root, text="Address:")
+        self.address_label.grid(row=3, column=0, padx=10, pady=10)
+        self.address_entry = Entry(root)
+        self.address_entry.grid(row=3, column=1, padx=10, pady=10)
 
-        print(f"\nContact '{name}' updated successfully!")
-    else:
-        print("\nContact not found.")
+        # Buttons for managing contacts
+        self.add_button = Button(root, text="Add Contact", command=self.add_contact)
+        self.add_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
-def delete_contact(contacts):
-    name = input("\nEnter the name of the contact to delete: ")
+        self.view_button = Button(root, text="View Contacts", command=self.view_contacts)
+        self.view_button.grid(row=5, column=0, columnspan=2, padx=10, pady=10)
 
-    if name in contacts:
-        del contacts[name]
-        print(f"\nContact '{name}' deleted successfully!")
-    else:
-        print("\nContact not found.")
+        self.search_button = Button(root, text="Search Contact", command=self.search_contact)
+        self.search_button.grid(row=6, column=0, columnspan=2, padx=10, pady=10)
 
-def contact_management():
-    contacts = load_contacts()
+        self.update_button = Button(root, text="Update Contact", command=self.update_contact)
+        self.update_button.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
 
-    while True:
-        print("\n===== Contact Management =====")
-        print("1. Add Contact")
-        print("2. View Contacts")
-        print("3. Search Contact")
-        print("4. Update Contact")
-        print("5. Delete Contact")
-        print("6. Quit")
+        self.delete_button = Button(root, text="Delete Contact", command=self.delete_contact)
+        self.delete_button.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
 
-        choice = input("Enter your choice (1-6): ")
+        # Listbox for displaying contact list
+        self.contact_listbox = Listbox(root, width=50, height=10)
+        self.contact_listbox.grid(row=0, column=2, rowspan=9, padx=10, pady=10)
+        
+        # Scrollbar for the contact listbox
+        self.scrollbar = Scrollbar(root, orient="vertical")
+        self.scrollbar.config(command=self.contact_listbox.yview)
+        self.scrollbar.grid(row=0, column=3, rowspan=9, sticky="ns")
 
-        if choice == "1":
-            add_contact(contacts)
-        elif choice == "2":
-            view_contacts(contacts)
-        elif choice == "3":
-            search_contact(contacts)
-        elif choice == "4":
-            update_contact(contacts)
-        elif choice == "5":
-            delete_contact(contacts)
-        elif choice == "6":
-            save_contacts(contacts)
-            print("\nExiting Contact Management. Goodbye!")
-            break
+    def add_contact(self):
+        name = self.name_entry.get()
+        phone = self.phone_entry.get()
+        email = self.email_entry.get()
+        address = self.address_entry.get()
+
+        if name and phone:
+            contact = Contact(name, phone, email, address)
+            self.contact_manager.add_contact(contact)
+            messagebox.showinfo("Success", "Contact added successfully.")
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 6.")
+            messagebox.showwarning("Warning", "Name and phone are required.")
+
+    def view_contacts(self):
+        self.contact_listbox.delete(0, tk.END)
+        for contact in self.contact_manager.contacts:
+            self.contact_listbox.insert(tk.END, f"{contact.name} - {contact.phone}")
+
+    def search_contact(self):
+        keyword = simpledialog.askstring("Search Contact", "Enter name or phone:")
+        if keyword:
+            results = self.contact_manager.search_contact(keyword)
+            if results:
+                self.contact_listbox.delete(0, tk.END)
+                for contact in results:
+                    self.contact_listbox.insert(tk.END, f"{contact.name} - {contact.phone}")
+            else:
+                messagebox.showinfo("Search Result", "No matching contacts found.")
+        else:
+            messagebox.showwarning("Warning", "Please enter a search keyword.")
+
+    def update_contact(self):
+        selected_index = self.contact_listbox.curselection()
+        if selected_index:
+            selected_index = selected_index[0]
+            selected_contact = self.contact_manager.contacts[selected_index]
+
+            updated_name = simpledialog.askstring("Update Contact", "Enter updated name:", initialvalue=selected_contact.name)
+            updated_phone = simpledialog.askstring("Update Contact", "Enter updated phone:", initialvalue=selected_contact.phone)
+            updated_email = simpledialog.askstring("Update Contact", "Enter updated email:", initialvalue=selected_contact.email)
+            updated_address = simpledialog.askstring("Update Contact", "Enter updated address:", initialvalue=selected_contact.address)
+
+            if updated_name and updated_phone:
+                updated_contact = Contact(updated_name, updated_phone, updated_email, updated_address)
+                self.contact_manager.update_contact(selected_index, updated_contact)
+                messagebox.showinfo("Success", "Contact updated successfully.")
+            else:
+                messagebox.showwarning("Warning", "Name and phone are required.")
+        else:
+            messagebox.showwarning("Warning", "Please select a contact to update.")
+
+    def delete_contact(self):
+        selected_index = self.contact_listbox.curselection()
+        if selected_index:
+            confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to delete this contact?")
+            if confirmation:
+                selected_index = selected_index[0]
+                self.contact_manager.delete_contact(selected_index)
+                messagebox.showinfo("Success", "Contact deleted successfully.")
+        else:
+            messagebox.showwarning("Warning", "Please select a contact to delete.")
 
 if __name__ == "__main__":
-    contact_management()
+    root = tk.Tk()
+    app = ContactApp(root)
+    root.mainloop()
