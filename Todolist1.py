@@ -1,83 +1,53 @@
-import os
-
-def display_menu():
-    print("\n===== To-Do List Menu =====")
-    print("1. View To-Do List")
-    print("2. Add Task")
-    print("3. Update Task")
-    print("4. Delete Task")
-    print("5. Exit")
-
-def view_todo_list():
-    with open("todo.txt", "r") as file:
-        tasks = file.readlines()
-        if tasks:
-            print("\n===== To-Do List =====")
-            for i, task in enumerate(tasks, start=1):
-                print(f"{i}. {task.strip()}")
-        else:
-            print("\nYour to-do list is empty.")
+import tkinter as tk
+from tkinter import messagebox
 
 def add_task():
-    task = input("\nEnter the task: ")
-    with open("todo.txt", "a") as file:
-        file.write(task + "\n")
-    print(f'Task "{task}" added successfully.')
+    task = entry.get()
+    if task:
+        listbox.insert(tk.END, task)
+        entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Warning", "Please enter a task.")
 
 def update_task():
-    view_todo_list()
-    try:
-        task_number = int(input("\nEnter the task number to update: "))
-        with open("todo.txt", "r") as file:
-            tasks = file.readlines()
-            if 1 <= task_number <= len(tasks):
-                new_task = input("Enter the updated task: ")
-                tasks[task_number - 1] = new_task + "\n"
-                with open("todo.txt", "w") as file:
-                    file.writelines(tasks)
-                print(f'Task {task_number} updated successfully.')
-            else:
-                print("Invalid task number.")
-    except ValueError:
-        print("Invalid input. Please enter a valid task number.")
+    selected_task_index = listbox.curselection()
+    updated_task = entry.get()
+    if selected_task_index and updated_task:
+        listbox.delete(selected_task_index)
+        listbox.insert(tk.END, updated_task)
+        entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Warning", "Please select a task and enter an update.")
 
-def delete_task():
-    view_todo_list()
-    try:
-        task_number = int(input("\nEnter the task number to delete: "))
-        with open("todo.txt", "r") as file:
-            tasks = file.readlines()
-            if 1 <= task_number <= len(tasks):
-                deleted_task = tasks.pop(task_number - 1)
-                with open("todo.txt", "w") as file:
-                    file.writelines(tasks)
-                print(f'Task "{deleted_task.strip()}" deleted successfully.')
-            else:
-                print("Invalid task number.")
-    except ValueError:
-        print("Invalid input. Please enter a valid task number.")
+def remove_task():
+    selected_task_index = listbox.curselection()
+    if selected_task_index:
+        listbox.delete(selected_task_index)
+        entry.delete(0, tk.END)
+    else:
+        messagebox.showwarning("Warning", "Please select a task to remove.")
 
-def main():
-    while True:
-        display_menu()
-        choice = input("Enter your choice (1-5): ")
+# Create the main window
+root = tk.Tk()
+root.title("To-Do List App")
 
-        if choice == "1":
-            view_todo_list()
-        elif choice == "2":
-            add_task()
-        elif choice == "3":
-            update_task()
-        elif choice == "4":
-            delete_task()
-        elif choice == "5":
-            print("\nExiting the To-Do List application. Goodbye!")
-            break
-        else:
-            print("\nInvalid choice. Please enter a number between 1 and 5.")
+# Entry widget for entering tasks
+entry = tk.Entry(root, width=40, font=("Helvetica", 14))
+entry.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-if __name__ == "__main__":
-    if not os.path.exists("todo.txt"):
-        with open("todo.txt", "w"):
-            pass  # Create the todo.txt file if it doesn't exist
-    main()
+# Buttons for adding, updating, and removing tasks
+add_button = tk.Button(root, text="Add", command=add_task, font=("Helvetica", 12))
+add_button.grid(row=0, column=2, padx=5, pady=10)
+
+update_button = tk.Button(root, text="Update", command=update_task, font=("Helvetica", 12))
+update_button.grid(row=0, column=3, padx=5, pady=10)
+
+remove_button = tk.Button(root, text="Remove", command=remove_task, font=("Helvetica", 12))
+remove_button.grid(row=0, column=4, padx=5, pady=10)
+
+# Listbox for displaying tasks
+listbox = tk.Listbox(root, selectmode=tk.SINGLE, width=50, height=10, font=("Helvetica", 12))
+listbox.grid(row=1, column=0, columnspan=5, padx=10, pady=10)
+
+# Run the main loop
+root.mainloop()
